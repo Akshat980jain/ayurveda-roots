@@ -50,6 +50,7 @@ function Admin() {
       ...p,
       price: String(p.price), discount_price: p.discount_price ? String(p.discount_price) : "", stock: String(p.stock),
       ingredients: (p.ingredients ?? []).join(", "), benefits: (p.benefits ?? []).join(", "),
+      images: p.images ?? [],
     });
     setOpen(true);
   };
