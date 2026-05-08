@@ -11,10 +11,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { inr } from "@/lib/format";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { ImageUploader } from "@/components/admin/ImageUploader";
 
 export const Route = createFileRoute("/admin")({ component: Admin });
 
-const empty = { name: "", slug: "", hindi_name: "", description: "", short_description: "", price: "", discount_price: "", stock: "0", category_id: "", dosage_type: "Powder", ingredients: "", benefits: "", usage_instructions: "", is_featured: false };
+const empty = { name: "", slug: "", hindi_name: "", description: "", short_description: "", price: "", discount_price: "", stock: "0", category_id: "", dosage_type: "Powder", ingredients: "", benefits: "", usage_instructions: "", is_featured: false, images: [] as string[] };
 
 function Admin() {
   const { user, isAdmin, loading } = useAuth();
