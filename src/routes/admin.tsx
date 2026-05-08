@@ -63,6 +63,7 @@ function Admin() {
       ingredients: form.ingredients.split(",").map((s: string) => s.trim()).filter(Boolean),
       benefits: form.benefits.split(",").map((s: string) => s.trim()).filter(Boolean),
       usage_instructions: form.usage_instructions, is_featured: !!form.is_featured,
+      images: form.images ?? [],
     };
     const { error } = editing
       ? await supabase.from("products").update(payload).eq("id", editing.id)
