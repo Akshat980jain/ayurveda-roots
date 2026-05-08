@@ -173,4 +173,4 @@ function Admin() {
   );
 }
 function Stat({ l, v }: any) { return <div className="rounded-2xl border border-border/60 bg-card p-5"><div className="text-xs text-muted-foreground">{l}</div><div className="mt-1 font-display text-3xl font-semibold text-clay">{v}</div></div>; }
-function F({ l, v, on }: any) { return <div><Label>{l}</Label><Input value={v} onChange={(e) => on(e.target.value)} className="mt-1" /></div>; }
+function F({ l, v, on }: { l: string; v: string; on: (v: string) => void }) { return <div><Label>{l}</Label><Input value={v} onChange={(e) => on(e.target.value)} className="mt-1" /></div>; }
