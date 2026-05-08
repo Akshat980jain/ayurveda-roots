@@ -4,7 +4,7 @@ import soap from "@/assets/product-soap.jpg";
 import tablet from "@/assets/product-tablet.jpg";
 
 export function imageForProduct(p: { dosage_type?: string | null; images?: string[] | null; slug?: string }) {
-  if (p.images && p.images.length > 0 && p.images[0].startsWith("http")) return p.images[0];
+  if (p.images && p.images.length > 0 && typeof p.images[0] === "string" && p.images[0].startsWith("http")) return p.images[0];
   switch (p.dosage_type) {
     case "Oil": return oil;
     case "Powder": case "Kadha": return powder;
