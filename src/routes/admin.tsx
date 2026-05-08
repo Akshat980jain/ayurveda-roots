@@ -11,10 +11,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { inr } from "@/lib/format";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { ImageUploader } from "@/components/admin/ImageUploader";
 
 export const Route = createFileRoute("/admin")({ component: Admin });
 
-const empty = { name: "", slug: "", hindi_name: "", description: "", short_description: "", price: "", discount_price: "", stock: "0", category_id: "", dosage_type: "Powder", ingredients: "", benefits: "", usage_instructions: "", is_featured: false };
+const empty = { name: "", slug: "", hindi_name: "", description: "", short_description: "", price: "", discount_price: "", stock: "0", category_id: "", dosage_type: "Powder", ingredients: "", benefits: "", usage_instructions: "", is_featured: false, images: [] as string[] };
 
 function Admin() {
   const { user, isAdmin, loading } = useAuth();
@@ -49,6 +50,7 @@ function Admin() {
       ...p,
       price: String(p.price), discount_price: p.discount_price ? String(p.discount_price) : "", stock: String(p.stock),
       ingredients: (p.ingredients ?? []).join(", "), benefits: (p.benefits ?? []).join(", "),
+      images: p.images ?? [],
     });
     setOpen(true);
   };
@@ -61,6 +63,7 @@ function Admin() {
       ingredients: form.ingredients.split(",").map((s: string) => s.trim()).filter(Boolean),
       benefits: form.benefits.split(",").map((s: string) => s.trim()).filter(Boolean),
       usage_instructions: form.usage_instructions, is_featured: !!form.is_featured,
+      images: form.images ?? [],
     };
     const { error } = editing
       ? await supabase.from("products").update(payload).eq("id", editing.id)
@@ -124,6 +127,7 @@ function Admin() {
                   <div className="sm:col-span-2"><Label>Ingredients (comma-separated)</Label><Input value={form.ingredients} onChange={(e) => setForm({ ...form, ingredients: e.target.value })} className="mt-1" /></div>
                   <div className="sm:col-span-2"><Label>Benefits (comma-separated)</Label><Input value={form.benefits} onChange={(e) => setForm({ ...form, benefits: e.target.value })} className="mt-1" /></div>
                   <div className="sm:col-span-2"><Label>Usage instructions</Label><Input value={form.usage_instructions} onChange={(e) => setForm({ ...form, usage_instructions: e.target.value })} className="mt-1" /></div>
+                  <div className="sm:col-span-2"><Label>Product images</Label><div className="mt-2"><ImageUploader value={form.images ?? []} onChange={(images) => setForm({ ...form, images })} /></div></div>
                   <label className="flex items-center gap-2 sm:col-span-2"><input type="checkbox" checked={form.is_featured} onChange={(e) => setForm({ ...form, is_featured: e.target.checked })} /> Featured</label>
                 </div>
                 <Button onClick={save} className="mt-4">Save</Button>
