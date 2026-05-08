@@ -127,6 +127,7 @@ function Admin() {
                   <div className="sm:col-span-2"><Label>Ingredients (comma-separated)</Label><Input value={form.ingredients} onChange={(e) => setForm({ ...form, ingredients: e.target.value })} className="mt-1" /></div>
                   <div className="sm:col-span-2"><Label>Benefits (comma-separated)</Label><Input value={form.benefits} onChange={(e) => setForm({ ...form, benefits: e.target.value })} className="mt-1" /></div>
                   <div className="sm:col-span-2"><Label>Usage instructions</Label><Input value={form.usage_instructions} onChange={(e) => setForm({ ...form, usage_instructions: e.target.value })} className="mt-1" /></div>
+                  <div className="sm:col-span-2"><Label>Product images</Label><div className="mt-2"><ImageUploader value={form.images ?? []} onChange={(images) => setForm({ ...form, images })} /></div></div>
                   <label className="flex items-center gap-2 sm:col-span-2"><input type="checkbox" checked={form.is_featured} onChange={(e) => setForm({ ...form, is_featured: e.target.checked })} /> Featured</label>
                 </div>
                 <Button onClick={save} className="mt-4">Save</Button>
