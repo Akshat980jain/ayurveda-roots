@@ -25,6 +25,13 @@ function Account() {
     supabase.from("orders").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).then(({ data }) => setOrders(data ?? []));
     supabase.from("profiles").select("*").eq("id", user.id).maybeSingle().then(({ data }) => data && setProfile(data));
     supabase.from("wishlist_items").select("*, products(*)").eq("user_id", user.id).then(({ data }) => setWishlist(data ?? []));
+
+    const channel = supabase
+      .channel(`orders-${user.id}`)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "orders", filter: `user_id=eq.${user.id}` },
+        (payload) => setOrders((prev) => prev.map((o) => o.id === (payload.new as any).id ? { ...o, ...payload.new } : o)))
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
   }, [user, al, nav]);
 
   if (!user) return null;
