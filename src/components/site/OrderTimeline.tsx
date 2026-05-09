@@ -3,14 +3,26 @@ import { cn } from "@/lib/utils";
 
 export type OrderStatus = "pending" | "confirmed" | "shipped" | "delivered" | "cancelled";
 
-const STEPS: { key: OrderStatus; label: string; hindi: string; Icon: any }[] = [
-  { key: "pending",   label: "Order placed", hindi: "ऑर्डर मिला",     Icon: Clock },
-  { key: "confirmed", label: "Confirmed",    hindi: "पुष्टि",          Icon: Check },
-  { key: "shipped",   label: "Shipped",      hindi: "भेज दिया",        Icon: Truck },
-  { key: "delivered", label: "Delivered",    hindi: "पहुँच गया",       Icon: Home },
+const STEPS: { key: OrderStatus; label: string; hindi: string; Icon: any; offsetDays: number }[] = [
+  { key: "pending",   label: "Order placed", hindi: "ऑर्डर मिला",     Icon: Clock, offsetDays: 0 },
+  { key: "confirmed", label: "Confirmed",    hindi: "पुष्टि",          Icon: Check, offsetDays: 1 },
+  { key: "shipped",   label: "Shipped",      hindi: "भेज दिया",        Icon: Truck, offsetDays: 2 },
+  { key: "delivered", label: "Delivered",    hindi: "पहुँच गया",       Icon: Home,  offsetDays: 5 },
 ];
 
-export function OrderTimeline({ status, className }: { status: OrderStatus; className?: string }) {
+const DATE_FMT = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short" });
+
+function windowFor(base: Date, offsetDays: number, isPlaced: boolean) {
+  if (isPlaced) {
+    const time = base.toLocaleTimeString("en-IN", { hour: "numeric", minute: "2-digit", hour12: true });
+    return { date: DATE_FMT.format(base), window: time };
+  }
+  const start = new Date(base.getTime() + offsetDays * 86400000);
+  const end = new Date(base.getTime() + (offsetDays + 1) * 86400000);
+  return { date: DATE_FMT.format(start), window: `${DATE_FMT.format(start)} – ${DATE_FMT.format(end)}` };
+}
+
+export function OrderTimeline({ status, createdAt, className }: { status: OrderStatus; createdAt?: string | Date; className?: string }) {
   if (status === "cancelled") {
     return (
       <div className={cn("flex items-center gap-3 rounded-2xl border border-destructive/30 bg-destructive/5 p-4", className)}>
@@ -24,6 +36,7 @@ export function OrderTimeline({ status, className }: { status: OrderStatus; clas
   }
 
   const activeIdx = STEPS.findIndex((s) => s.key === status);
+  const base = createdAt ? new Date(createdAt) : null;
 
   return (
     <div className={cn("relative", className)}>
@@ -33,11 +46,12 @@ export function OrderTimeline({ status, className }: { status: OrderStatus; clas
         style={{ width: `${(activeIdx / (STEPS.length - 1)) * 100}%` }}
         aria-hidden
       />
-      <ol className="relative flex justify-between">
+      <ol className="relative flex justify-between gap-2">
         {STEPS.map((s, i) => {
           const done = i < activeIdx;
           const current = i === activeIdx;
           const Icon = s.Icon;
+          const eta = base ? windowFor(base, s.offsetDays, i === 0) : null;
           return (
             <li key={s.key} className="flex flex-1 flex-col items-center text-center">
               <div
@@ -52,6 +66,14 @@ export function OrderTimeline({ status, className }: { status: OrderStatus; clas
               </div>
               <div className={cn("mt-2 text-xs font-medium", (done || current) ? "text-foreground" : "text-muted-foreground")}>{s.label}</div>
               <div className="font-hindi text-[10px] text-muted-foreground">{s.hindi}</div>
+              {eta && (
+                <div className="mt-1.5 leading-tight">
+                  <div className={cn("text-[11px] font-medium", (done || current) ? "text-foreground" : "text-muted-foreground")}>
+                    {i === 0 ? eta.date : `Est. ${eta.date}`}
+                  </div>
+                  <div className="text-[10px] text-muted-foreground">{eta.window}</div>
+                </div>
+              )}
             </li>
           );
         })}
