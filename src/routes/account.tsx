@@ -63,7 +63,7 @@ function Account() {
               <div className="mt-3 text-sm text-muted-foreground">{(o.items as any[]).map((i) => `${i.name} × ${i.quantity}`).join(", ")}</div>
               <div className="mt-2 font-semibold text-clay">{inr(o.total)}</div>
               <div className="mt-5 border-t border-border/60 pt-5">
-                <OrderTimeline status={o.status as OrderStatus} />
+                <OrderTimeline status={o.status as OrderStatus} createdAt={o.created_at} />
               </div>
             </div>
           ))}
