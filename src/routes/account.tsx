@@ -8,6 +8,7 @@ import { inr } from "@/lib/format";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { OrderTimeline, type OrderStatus } from "@/components/site/OrderTimeline";
 
 export const Route = createFileRoute("/account")({ component: Account });
 
