@@ -35,7 +35,7 @@ function OrderConfirm() {
           <h2 className="font-display text-xl font-semibold">Order tracking</h2>
           <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground"><span className="size-1.5 animate-pulse rounded-full bg-primary" /> Live</span>
         </div>
-        <OrderTimeline status={(liveStatus ?? o.status) as OrderStatus} />
+        <OrderTimeline status={(liveStatus ?? o.status) as OrderStatus} createdAt={o.created_at} />
       </div>
     </div>
   );
