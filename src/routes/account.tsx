@@ -8,6 +8,7 @@ import { inr } from "@/lib/format";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { OrderTimeline, type OrderStatus } from "@/components/site/OrderTimeline";
 
 export const Route = createFileRoute("/account")({ component: Account });
 
@@ -24,6 +25,13 @@ function Account() {
     supabase.from("orders").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).then(({ data }) => setOrders(data ?? []));
     supabase.from("profiles").select("*").eq("id", user.id).maybeSingle().then(({ data }) => data && setProfile(data));
     supabase.from("wishlist_items").select("*, products(*)").eq("user_id", user.id).then(({ data }) => setWishlist(data ?? []));
+
+    const channel = supabase
+      .channel(`orders-${user.id}`)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "orders", filter: `user_id=eq.${user.id}` },
+        (payload) => setOrders((prev) => prev.map((o) => o.id === (payload.new as any).id ? { ...o, ...payload.new } : o)))
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
   }, [user, al, nav]);
 
   if (!user) return null;
@@ -54,6 +62,9 @@ function Account() {
               </div>
               <div className="mt-3 text-sm text-muted-foreground">{(o.items as any[]).map((i) => `${i.name} × ${i.quantity}`).join(", ")}</div>
               <div className="mt-2 font-semibold text-clay">{inr(o.total)}</div>
+              <div className="mt-5 border-t border-border/60 pt-5">
+                <OrderTimeline status={o.status as OrderStatus} />
+              </div>
             </div>
           ))}
         </TabsContent>

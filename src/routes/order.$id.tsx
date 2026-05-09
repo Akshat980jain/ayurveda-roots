@@ -4,6 +4,8 @@ import { CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { inr } from "@/lib/format";
+import { OrderTimeline, type OrderStatus } from "@/components/site/OrderTimeline";
+import { useOrderStatus } from "@/hooks/use-order-status";
 
 export const Route = createFileRoute("/order/$id")({ component: OrderConfirm });
 
@@ -11,6 +13,7 @@ function OrderConfirm() {
   const { id } = Route.useParams();
   const [o, setO] = useState<any>(null);
   useEffect(() => { supabase.from("orders").select("*").eq("id", id).maybeSingle().then(({ data }) => setO(data)); }, [id]);
+  const liveStatus = useOrderStatus(id, o?.status as OrderStatus | undefined);
   if (!o) return <div className="mx-auto max-w-3xl px-4 py-20 md:px-8">Loading…</div>;
   return (
     <div className="mx-auto max-w-3xl px-4 py-16 md:px-8">
@@ -25,6 +28,14 @@ function OrderConfirm() {
           <Link to="/account"><Button variant="outline" className="rounded-full">View orders</Button></Link>
           <Link to="/shop"><Button className="rounded-full">Continue shopping</Button></Link>
         </div>
+      </div>
+
+      <div className="mt-8 rounded-3xl border border-border/60 bg-card p-8 shadow-soft">
+        <div className="mb-6 flex items-center justify-between">
+          <h2 className="font-display text-xl font-semibold">Order tracking</h2>
+          <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground"><span className="size-1.5 animate-pulse rounded-full bg-primary" /> Live</span>
+        </div>
+        <OrderTimeline status={(liveStatus ?? o.status) as OrderStatus} />
       </div>
     </div>
   );
