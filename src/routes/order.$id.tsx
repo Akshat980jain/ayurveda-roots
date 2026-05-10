@@ -13,8 +13,9 @@ function OrderConfirm() {
   const { id } = Route.useParams();
   const [o, setO] = useState<any>(null);
   useEffect(() => { supabase.from("orders").select("*").eq("id", id).maybeSingle().then(({ data }) => setO(data)); }, [id]);
-  const liveStatus = useOrderStatus(id, o?.status as OrderStatus | undefined);
+  const live = useOrderStatus(id, o ? { status: o.status, cancellation_reason: o.cancellation_reason, cancelled_at: o.cancelled_at } : undefined);
   if (!o) return <div className="mx-auto max-w-3xl px-4 py-20 md:px-8">Loading…</div>;
+  const status = (live.status ?? o.status) as OrderStatus;
   return (
     <div className="mx-auto max-w-3xl px-4 py-16 md:px-8">
       <div className="rounded-3xl border border-border/60 bg-card p-10 text-center shadow-soft">
@@ -35,7 +36,13 @@ function OrderConfirm() {
           <h2 className="font-display text-xl font-semibold">Order tracking</h2>
           <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground"><span className="size-1.5 animate-pulse rounded-full bg-primary" /> Live</span>
         </div>
-        <OrderTimeline status={(liveStatus ?? o.status) as OrderStatus} createdAt={o.created_at} />
+        <OrderTimeline
+          status={status}
+          createdAt={o.created_at}
+          cancelledAt={live.cancelled_at ?? o.cancelled_at}
+          cancellationReason={live.cancellation_reason ?? o.cancellation_reason}
+          paymentMethod={o.payment_method}
+        />
       </div>
     </div>
   );
