@@ -58,7 +58,7 @@ function AdminOrders() {
       setCancelOrder(order); setReason(""); return;
     }
     setWorking(true);
-    const { error } = await supabase.from("orders").update({ status, cancellation_reason: null, cancelled_at: null }).eq("id", order.id);
+    const { error } = await supabase.from("orders").update({ status: status as OrderStatus, cancellation_reason: null, cancelled_at: null }).eq("id", order.id);
     setWorking(false);
     if (error) return toast.error(error.message);
     toast.success(`Order updated to ${status}`);
