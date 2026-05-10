@@ -2,23 +2,32 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { OrderStatus } from "@/components/site/OrderTimeline";
 
-/** Subscribes to a single order's status via Supabase Realtime. */
-export function useOrderStatus(orderId: string | undefined, initial?: OrderStatus) {
-  const [status, setStatus] = useState<OrderStatus | undefined>(initial);
+export type OrderRealtime = {
+  status: OrderStatus;
+  cancellation_reason: string | null;
+  cancelled_at: string | null;
+};
+
+/** Subscribes to a single order's status (and cancellation info) via Supabase Realtime. */
+export function useOrderStatus(orderId: string | undefined, initial?: Partial<OrderRealtime>) {
+  const [data, setData] = useState<Partial<OrderRealtime>>(initial ?? {});
 
   useEffect(() => {
     if (!orderId) return;
     let cancelled = false;
-    supabase.from("orders").select("status").eq("id", orderId).maybeSingle().then(({ data }) => {
-      if (!cancelled && data?.status) setStatus(data.status as OrderStatus);
+    supabase.from("orders").select("status, cancellation_reason, cancelled_at").eq("id", orderId).maybeSingle().then(({ data: d }) => {
+      if (!cancelled && d) setData(d as OrderRealtime);
     });
     const channel = supabase
       .channel(`order-${orderId}`)
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "orders", filter: `id=eq.${orderId}` },
-        (payload) => setStatus((payload.new as any).status as OrderStatus))
+        (payload) => {
+          const n = payload.new as any;
+          setData({ status: n.status, cancellation_reason: n.cancellation_reason, cancelled_at: n.cancelled_at });
+        })
       .subscribe();
     return () => { cancelled = true; supabase.removeChannel(channel); };
   }, [orderId]);
 
-  return status;
+  return data;
 }
