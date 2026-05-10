@@ -153,6 +153,8 @@ export type Database = {
       }
       orders: {
         Row: {
+          cancellation_reason: string | null
+          cancelled_at: string | null
           coupon_code: string | null
           created_at: string
           discount: number
@@ -170,6 +172,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
           coupon_code?: string | null
           created_at?: string
           discount?: number
@@ -187,6 +191,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
           coupon_code?: string | null
           created_at?: string
           discount?: number
