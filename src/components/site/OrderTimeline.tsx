@@ -1,4 +1,4 @@
-import { Check, Clock, Package, Truck, Home, XCircle } from "lucide-react";
+import { Check, Clock, Package, Truck, Home, XCircle, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export type OrderStatus = "pending" | "confirmed" | "shipped" | "delivered" | "cancelled";
@@ -11,6 +11,7 @@ const STEPS: { key: OrderStatus; label: string; hindi: string; Icon: any; offset
 ];
 
 const DATE_FMT = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short" });
+const DATETIME_FMT = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short", year: "numeric" });
 
 function windowFor(base: Date, offsetDays: number, isPlaced: boolean) {
   if (isPlaced) {
@@ -22,14 +23,58 @@ function windowFor(base: Date, offsetDays: number, isPlaced: boolean) {
   return { date: DATE_FMT.format(start), window: `${DATE_FMT.format(start)} – ${DATE_FMT.format(end)}` };
 }
 
-export function OrderTimeline({ status, createdAt, className }: { status: OrderStatus; createdAt?: string | Date; className?: string }) {
+export function OrderTimeline({
+  status,
+  createdAt,
+  cancelledAt,
+  cancellationReason,
+  paymentMethod,
+  className,
+}: {
+  status: OrderStatus;
+  createdAt?: string | Date;
+  cancelledAt?: string | Date | null;
+  cancellationReason?: string | null;
+  paymentMethod?: string | null;
+  className?: string;
+}) {
   if (status === "cancelled") {
+    const cancelDate = cancelledAt ? new Date(cancelledAt) : (createdAt ? new Date(createdAt) : new Date());
+    const isCOD = (paymentMethod ?? "cod").toLowerCase() === "cod";
+    const refundEta = new Date(cancelDate.getTime() + 7 * 86400000);
     return (
-      <div className={cn("flex items-center gap-3 rounded-2xl border border-destructive/30 bg-destructive/5 p-4", className)}>
-        <XCircle className="size-6 text-destructive" />
-        <div>
-          <div className="font-medium text-destructive">Order cancelled</div>
-          <div className="text-xs text-muted-foreground">यह ऑर्डर रद्द कर दिया गया है</div>
+      <div className={cn("rounded-2xl border border-destructive/30 bg-destructive/5 p-5 space-y-4", className)}>
+        <div className="flex items-start gap-3">
+          <XCircle className="size-6 shrink-0 text-destructive" />
+          <div className="flex-1">
+            <div className="font-medium text-destructive">Order cancelled</div>
+            <div className="font-hindi text-xs text-muted-foreground">यह ऑर्डर रद्द कर दिया गया है</div>
+            <div className="mt-1 text-xs text-muted-foreground">Cancelled on {DATETIME_FMT.format(cancelDate)}</div>
+          </div>
+        </div>
+
+        {cancellationReason && (
+          <div className="rounded-lg border border-border/60 bg-background/60 p-3">
+            <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Reason</div>
+            <div className="mt-0.5 text-sm">{cancellationReason}</div>
+          </div>
+        )}
+
+        <div className="flex items-start gap-3 rounded-lg border border-border/60 bg-background/60 p-3">
+          <RotateCcw className="size-5 shrink-0 text-primary" />
+          <div className="text-sm">
+            {isCOD ? (
+              <>
+                <div className="font-medium">No refund needed</div>
+                <div className="text-xs text-muted-foreground">This was a Cash on Delivery order — no payment was collected.</div>
+              </>
+            ) : (
+              <>
+                <div className="font-medium">Estimated refund by {DATE_FMT.format(refundEta)}</div>
+                <div className="text-xs text-muted-foreground">Refund will be credited to your original payment method within 5–7 business days.</div>
+              </>
+            )}
+          </div>
         </div>
       </div>
     );

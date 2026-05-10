@@ -9,8 +9,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { OrderTimeline, type OrderStatus } from "@/components/site/OrderTimeline";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const Route = createFileRoute("/account")({ component: Account });
+
+const CANCEL_REASONS = [
+  "Changed my mind",
+  "Ordered by mistake",
+  "Found a better price elsewhere",
+  "Need to update shipping address",
+  "Delivery taking too long",
+  "Other",
+];
 
 function Account() {
   const { user, loading: al, signOut } = useAuth();
@@ -18,6 +29,10 @@ function Account() {
   const [orders, setOrders] = useState<any[]>([]);
   const [profile, setProfile] = useState<any>({ full_name: "", phone: "" });
   const [wishlist, setWishlist] = useState<any[]>([]);
+  const [cancelOrder, setCancelOrder] = useState<any>(null);
+  const [reasonChoice, setReasonChoice] = useState(CANCEL_REASONS[0]);
+  const [reasonNote, setReasonNote] = useState("");
+  const [cancelling, setCancelling] = useState(false);
 
   useEffect(() => {
     if (!al && !user) nav({ to: "/login" });
@@ -41,6 +56,23 @@ function Account() {
     if (error) toast.error(error.message); else toast.success("Profile updated");
   };
 
+  const submitCancel = async () => {
+    if (!cancelOrder) return;
+    const reason = reasonChoice === "Other" ? reasonNote.trim() : reasonChoice;
+    if (!reason) { toast.error("Please provide a reason"); return; }
+    setCancelling(true);
+    const { error } = await supabase
+      .from("orders")
+      .update({ status: "cancelled", cancellation_reason: reason, cancelled_at: new Date().toISOString() })
+      .eq("id", cancelOrder.id);
+    setCancelling(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Order cancelled");
+    setCancelOrder(null);
+    setReasonChoice(CANCEL_REASONS[0]);
+    setReasonNote("");
+  };
+
   return (
     <div className="mx-auto max-w-5xl px-4 py-10 md:px-8">
       <div className="flex items-center justify-between">
@@ -58,12 +90,25 @@ function Account() {
             <div key={o.id} className="rounded-2xl border border-border/60 bg-card p-5">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div><div className="font-mono text-sm">#{o.id.slice(0,8)}</div><div className="text-xs text-muted-foreground">{new Date(o.created_at).toLocaleString()}</div></div>
-                <span className="rounded-full bg-secondary px-3 py-1 text-xs font-medium capitalize">{o.status}</span>
+                <div className="flex items-center gap-2">
+                  <span className="rounded-full bg-secondary px-3 py-1 text-xs font-medium capitalize">{o.status}</span>
+                  {o.status === "pending" && (
+                    <Button size="sm" variant="outline" onClick={() => { setCancelOrder(o); setReasonChoice(CANCEL_REASONS[0]); setReasonNote(""); }}>
+                      Cancel
+                    </Button>
+                  )}
+                </div>
               </div>
               <div className="mt-3 text-sm text-muted-foreground">{(o.items as any[]).map((i) => `${i.name} × ${i.quantity}`).join(", ")}</div>
               <div className="mt-2 font-semibold text-clay">{inr(o.total)}</div>
               <div className="mt-5 border-t border-border/60 pt-5">
-                <OrderTimeline status={o.status as OrderStatus} createdAt={o.created_at} />
+                <OrderTimeline
+                  status={o.status as OrderStatus}
+                  createdAt={o.created_at}
+                  cancelledAt={o.cancelled_at}
+                  cancellationReason={o.cancellation_reason}
+                  paymentMethod={o.payment_method}
+                />
               </div>
             </div>
           ))}
@@ -87,6 +132,34 @@ function Account() {
           </div>
         </TabsContent>
       </Tabs>
+
+      <Dialog open={!!cancelOrder} onOpenChange={(v) => !v && setCancelOrder(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Cancel order #{cancelOrder?.id?.slice(0, 8)}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">Please tell us why you'd like to cancel this order.</p>
+            <div>
+              <Label>Reason</Label>
+              <Select value={reasonChoice} onValueChange={setReasonChoice}>
+                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                <SelectContent>{CANCEL_REASONS.map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+            {reasonChoice === "Other" && (
+              <div>
+                <Label>Tell us more</Label>
+                <Input value={reasonNote} onChange={(e) => setReasonNote(e.target.value)} className="mt-1" maxLength={200} placeholder="Add details..." />
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCancelOrder(null)} disabled={cancelling}>Keep order</Button>
+            <Button variant="destructive" onClick={submitCancel} disabled={cancelling}>{cancelling ? "Cancelling…" : "Confirm cancel"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
