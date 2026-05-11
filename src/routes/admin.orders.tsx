@@ -27,6 +27,8 @@ function AdminOrders() {
   const [cancelOrder, setCancelOrder] = useState<any>(null);
   const [reason, setReason] = useState("");
   const [working, setWorking] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkRefund, setBulkRefund] = useState<RefundStatus | "">("");
 
   const load = () => {
     setLoading(true);
