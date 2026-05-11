@@ -9,11 +9,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Search, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { OrderTimeline, type OrderStatus } from "@/components/site/OrderTimeline";
+import { OrderTimeline, type OrderStatus, type RefundStatus } from "@/components/site/OrderTimeline";
 
 export const Route = createFileRoute("/admin/orders")({ component: AdminOrders });
 
 const STATUSES: OrderStatus[] = ["pending", "confirmed", "shipped", "delivered", "cancelled"];
+const REFUND_STATUSES: RefundStatus[] = ["not_applicable", "pending", "processing", "completed", "failed"];
 const PAGE_SIZE = 8;
 
 function AdminOrders() {
