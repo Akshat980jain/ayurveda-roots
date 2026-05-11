@@ -178,6 +178,7 @@ function AdminOrders() {
                 <div className="font-mono text-sm">#{o.id.slice(0, 8)}</div>
                 <div className="text-xs text-muted-foreground">{new Date(o.created_at).toLocaleString()} · {o.payment_method.toUpperCase()}</div>
                 <div className="mt-1 text-sm">{(o.shipping_address as any).full_name} · {(o.shipping_address as any).city}, {(o.shipping_address as any).state} — {(o.shipping_address as any).pincode}</div>
+                </div>
               </div>
               <div className="flex items-center gap-3">
                 <div className="font-semibold text-clay">{inr(o.total)}</div>
