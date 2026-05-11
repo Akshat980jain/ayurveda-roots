@@ -108,6 +108,8 @@ function Account() {
                   cancelledAt={o.cancelled_at}
                   cancellationReason={o.cancellation_reason}
                   paymentMethod={o.payment_method}
+                  refundStatus={o.refund_status}
+                  refundUpdatedAt={o.refund_updated_at}
                 />
               </div>
             </div>
