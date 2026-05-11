@@ -77,17 +77,19 @@ export function OrderTimeline({
 
         <div className="flex items-start gap-3 rounded-lg border border-border/60 bg-background/60 p-3">
           <RotateCcw className="size-5 shrink-0 text-primary" />
-          <div className="text-sm">
-            {isCOD ? (
-              <>
-                <div className="font-medium">No refund needed</div>
-                <div className="text-xs text-muted-foreground">This was a Cash on Delivery order — no payment was collected.</div>
-              </>
-            ) : (
-              <>
-                <div className="font-medium">Estimated refund by {DATE_FMT.format(refundEta)}</div>
-                <div className="text-xs text-muted-foreground">Refund will be credited to your original payment method within 5–7 business days.</div>
-              </>
+          <div className="flex-1 text-sm">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="font-medium">{meta.label}</span>
+              <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide", meta.tone)}>
+                {refund.replace("_", " ")}
+              </span>
+            </div>
+            <div className="mt-0.5 text-xs text-muted-foreground">{meta.desc}</div>
+            {!isCOD && (refund === "pending" || refund === "processing") && (
+              <div className="mt-1 text-xs text-muted-foreground">Estimated credit by <span className="font-medium text-foreground">{DATE_FMT.format(refundEta)}</span> (5–7 business days).</div>
+            )}
+            {refundUpdatedAt && (
+              <div className="mt-1 text-[10px] text-muted-foreground">Updated {DATETIME_FMT.format(new Date(refundUpdatedAt))}</div>
             )}
           </div>
         </div>
