@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Search, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { OrderTimeline, type OrderStatus, type RefundStatus } from "@/components/site/OrderTimeline";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export const Route = createFileRoute("/admin/orders")({ component: AdminOrders });
 
