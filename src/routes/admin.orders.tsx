@@ -92,6 +92,37 @@ function AdminOrders() {
     load();
   };
 
+  const cancelledPageRows = pageRows.filter((o) => o.status === "cancelled");
+  const allCancelledSelected = cancelledPageRows.length > 0 && cancelledPageRows.every((o) => selected.has(o.id));
+  const toggleOne = (id: string, on: boolean) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (on) next.add(id); else next.delete(id);
+      return next;
+    });
+  };
+  const toggleAllOnPage = (on: boolean) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      cancelledPageRows.forEach((o) => { if (on) next.add(o.id); else next.delete(o.id); });
+      return next;
+    });
+  };
+  const clearSelection = () => setSelected(new Set());
+
+  const applyBulkRefund = async () => {
+    if (!bulkRefund || selected.size === 0) return;
+    setWorking(true);
+    const ids = Array.from(selected);
+    const { error } = await supabase.from("orders").update({ refund_status: bulkRefund }).in("id", ids);
+    setWorking(false);
+    if (error) return toast.error(error.message);
+    toast.success(`Updated ${ids.length} order(s) to ${bulkRefund.replace("_", " ")}`);
+    clearSelection();
+    setBulkRefund("");
+    load();
+  };
+
   return (
     <div>
       <div>
