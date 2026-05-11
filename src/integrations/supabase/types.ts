@@ -163,6 +163,8 @@ export type Database = {
           payment_id: string | null
           payment_method: Database["public"]["Enums"]["payment_method"]
           payment_status: string
+          refund_status: Database["public"]["Enums"]["refund_status"]
+          refund_updated_at: string | null
           shipping: number
           shipping_address: Json
           status: Database["public"]["Enums"]["order_status"]
@@ -182,6 +184,8 @@ export type Database = {
           payment_id?: string | null
           payment_method?: Database["public"]["Enums"]["payment_method"]
           payment_status?: string
+          refund_status?: Database["public"]["Enums"]["refund_status"]
+          refund_updated_at?: string | null
           shipping?: number
           shipping_address: Json
           status?: Database["public"]["Enums"]["order_status"]
@@ -201,6 +205,8 @@ export type Database = {
           payment_id?: string | null
           payment_method?: Database["public"]["Enums"]["payment_method"]
           payment_status?: string
+          refund_status?: Database["public"]["Enums"]["refund_status"]
+          refund_updated_at?: string | null
           shipping?: number
           shipping_address?: Json
           status?: Database["public"]["Enums"]["order_status"]
@@ -419,6 +425,12 @@ export type Database = {
         | "delivered"
         | "cancelled"
       payment_method: "cod" | "razorpay" | "upi" | "card"
+      refund_status:
+        | "not_applicable"
+        | "pending"
+        | "processing"
+        | "completed"
+        | "failed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -555,6 +567,13 @@ export const Constants = {
         "cancelled",
       ],
       payment_method: ["cod", "razorpay", "upi", "card"],
+      refund_status: [
+        "not_applicable",
+        "pending",
+        "processing",
+        "completed",
+        "failed",
+      ],
     },
   },
 } as const
