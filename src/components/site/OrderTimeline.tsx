@@ -38,6 +38,8 @@ export function OrderTimeline({
   cancelledAt,
   cancellationReason,
   paymentMethod,
+  refundStatus,
+  refundUpdatedAt,
   className,
 }: {
   status: OrderStatus;
@@ -45,11 +47,15 @@ export function OrderTimeline({
   cancelledAt?: string | Date | null;
   cancellationReason?: string | null;
   paymentMethod?: string | null;
+  refundStatus?: RefundStatus | null;
+  refundUpdatedAt?: string | Date | null;
   className?: string;
 }) {
   if (status === "cancelled") {
     const cancelDate = cancelledAt ? new Date(cancelledAt) : (createdAt ? new Date(createdAt) : new Date());
     const isCOD = (paymentMethod ?? "cod").toLowerCase() === "cod";
+    const refund: RefundStatus = refundStatus ?? (isCOD ? "not_applicable" : "pending");
+    const meta = REFUND_META[refund];
     const refundEta = new Date(cancelDate.getTime() + 7 * 86400000);
     return (
       <div className={cn("rounded-2xl border border-destructive/30 bg-destructive/5 p-5 space-y-4", className)}>
