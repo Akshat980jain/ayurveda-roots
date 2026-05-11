@@ -2,6 +2,15 @@ import { Check, Clock, Package, Truck, Home, XCircle, RotateCcw } from "lucide-r
 import { cn } from "@/lib/utils";
 
 export type OrderStatus = "pending" | "confirmed" | "shipped" | "delivered" | "cancelled";
+export type RefundStatus = "not_applicable" | "pending" | "processing" | "completed" | "failed";
+
+const REFUND_META: Record<RefundStatus, { label: string; tone: string; desc: string }> = {
+  not_applicable: { label: "No refund needed", tone: "bg-muted text-muted-foreground", desc: "Cash on Delivery — no payment was collected." },
+  pending:        { label: "Refund pending",   tone: "bg-amber-500/15 text-amber-700 dark:text-amber-400", desc: "Refund request received and queued for processing." },
+  processing:     { label: "Refund processing", tone: "bg-blue-500/15 text-blue-700 dark:text-blue-400",  desc: "Refund is being processed by your bank or payment provider." },
+  completed:      { label: "Refund completed", tone: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400", desc: "Refund has been credited to your original payment method." },
+  failed:         { label: "Refund failed",    tone: "bg-destructive/15 text-destructive", desc: "Refund could not be processed. Our team will reach out shortly." },
+};
 
 const STEPS: { key: OrderStatus; label: string; hindi: string; Icon: any; offsetDays: number }[] = [
   { key: "pending",   label: "Order placed", hindi: "ऑर्डर मिला",     Icon: Clock, offsetDays: 0 },
@@ -29,6 +38,8 @@ export function OrderTimeline({
   cancelledAt,
   cancellationReason,
   paymentMethod,
+  refundStatus,
+  refundUpdatedAt,
   className,
 }: {
   status: OrderStatus;
@@ -36,11 +47,15 @@ export function OrderTimeline({
   cancelledAt?: string | Date | null;
   cancellationReason?: string | null;
   paymentMethod?: string | null;
+  refundStatus?: RefundStatus | null;
+  refundUpdatedAt?: string | Date | null;
   className?: string;
 }) {
   if (status === "cancelled") {
     const cancelDate = cancelledAt ? new Date(cancelledAt) : (createdAt ? new Date(createdAt) : new Date());
     const isCOD = (paymentMethod ?? "cod").toLowerCase() === "cod";
+    const refund: RefundStatus = refundStatus ?? (isCOD ? "not_applicable" : "pending");
+    const meta = REFUND_META[refund];
     const refundEta = new Date(cancelDate.getTime() + 7 * 86400000);
     return (
       <div className={cn("rounded-2xl border border-destructive/30 bg-destructive/5 p-5 space-y-4", className)}>
@@ -62,17 +77,19 @@ export function OrderTimeline({
 
         <div className="flex items-start gap-3 rounded-lg border border-border/60 bg-background/60 p-3">
           <RotateCcw className="size-5 shrink-0 text-primary" />
-          <div className="text-sm">
-            {isCOD ? (
-              <>
-                <div className="font-medium">No refund needed</div>
-                <div className="text-xs text-muted-foreground">This was a Cash on Delivery order — no payment was collected.</div>
-              </>
-            ) : (
-              <>
-                <div className="font-medium">Estimated refund by {DATE_FMT.format(refundEta)}</div>
-                <div className="text-xs text-muted-foreground">Refund will be credited to your original payment method within 5–7 business days.</div>
-              </>
+          <div className="flex-1 text-sm">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="font-medium">{meta.label}</span>
+              <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide", meta.tone)}>
+                {refund.replace("_", " ")}
+              </span>
+            </div>
+            <div className="mt-0.5 text-xs text-muted-foreground">{meta.desc}</div>
+            {!isCOD && (refund === "pending" || refund === "processing") && (
+              <div className="mt-1 text-xs text-muted-foreground">Estimated credit by <span className="font-medium text-foreground">{DATE_FMT.format(refundEta)}</span> (5–7 business days).</div>
+            )}
+            {refundUpdatedAt && (
+              <div className="mt-1 text-[10px] text-muted-foreground">Updated {DATETIME_FMT.format(new Date(refundUpdatedAt))}</div>
             )}
           </div>
         </div>

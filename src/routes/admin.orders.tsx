@@ -9,11 +9,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Search, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { OrderTimeline, type OrderStatus } from "@/components/site/OrderTimeline";
+import { OrderTimeline, type OrderStatus, type RefundStatus } from "@/components/site/OrderTimeline";
 
 export const Route = createFileRoute("/admin/orders")({ component: AdminOrders });
 
 const STATUSES: OrderStatus[] = ["pending", "confirmed", "shipped", "delivered", "cancelled"];
+const REFUND_STATUSES: RefundStatus[] = ["not_applicable", "pending", "processing", "completed", "failed"];
 const PAGE_SIZE = 8;
 
 function AdminOrders() {
@@ -79,6 +80,15 @@ function AdminOrders() {
     load();
   };
 
+  const handleRefundChange = async (order: any, refund: RefundStatus) => {
+    setWorking(true);
+    const { error } = await supabase.from("orders").update({ refund_status: refund }).eq("id", order.id);
+    setWorking(false);
+    if (error) return toast.error(error.message);
+    toast.success(`Refund marked as ${refund.replace("_", " ")}`);
+    load();
+  };
+
   return (
     <div>
       <div>
@@ -127,7 +137,21 @@ function AdminOrders() {
                 cancelledAt={o.cancelled_at}
                 cancellationReason={o.cancellation_reason}
                 paymentMethod={o.payment_method}
+                refundStatus={o.refund_status}
+                refundUpdatedAt={o.refund_updated_at}
               />
+              {o.status === "cancelled" && (
+                <div className="mt-4 flex flex-wrap items-center gap-3 rounded-lg border border-border/60 bg-muted/30 p-3">
+                  <Label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Refund / credit status</Label>
+                  <Select value={o.refund_status ?? "not_applicable"} onValueChange={(v) => handleRefundChange(o, v as RefundStatus)} disabled={working}>
+                    <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {REFUND_STATUSES.map((r) => <SelectItem key={r} value={r} className="capitalize">{r.replace("_", " ")}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                  {o.refund_updated_at && <span className="text-xs text-muted-foreground">Updated {new Date(o.refund_updated_at).toLocaleString()}</span>}
+                </div>
+              )}
             </div>
           </div>
         ))}

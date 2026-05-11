@@ -42,6 +42,8 @@ function OrderConfirm() {
           cancelledAt={live.cancelled_at ?? o.cancelled_at}
           cancellationReason={live.cancellation_reason ?? o.cancellation_reason}
           paymentMethod={o.payment_method}
+          refundStatus={live.refund_status ?? o.refund_status}
+          refundUpdatedAt={live.refund_updated_at ?? o.refund_updated_at}
         />
       </div>
     </div>
