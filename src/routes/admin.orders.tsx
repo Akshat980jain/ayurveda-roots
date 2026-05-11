@@ -137,7 +137,21 @@ function AdminOrders() {
                 cancelledAt={o.cancelled_at}
                 cancellationReason={o.cancellation_reason}
                 paymentMethod={o.payment_method}
+                refundStatus={o.refund_status}
+                refundUpdatedAt={o.refund_updated_at}
               />
+              {o.status === "cancelled" && (
+                <div className="mt-4 flex flex-wrap items-center gap-3 rounded-lg border border-border/60 bg-muted/30 p-3">
+                  <Label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Refund / credit status</Label>
+                  <Select value={o.refund_status ?? "not_applicable"} onValueChange={(v) => handleRefundChange(o, v as RefundStatus)} disabled={working}>
+                    <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {REFUND_STATUSES.map((r) => <SelectItem key={r} value={r} className="capitalize">{r.replace("_", " ")}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                  {o.refund_updated_at && <span className="text-xs text-muted-foreground">Updated {new Date(o.refund_updated_at).toLocaleString()}</span>}
+                </div>
+              )}
             </div>
           </div>
         ))}
