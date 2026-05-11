@@ -80,6 +80,15 @@ function AdminOrders() {
     load();
   };
 
+  const handleRefundChange = async (order: any, refund: RefundStatus) => {
+    setWorking(true);
+    const { error } = await supabase.from("orders").update({ refund_status: refund }).eq("id", order.id);
+    setWorking(false);
+    if (error) return toast.error(error.message);
+    toast.success(`Refund marked as ${refund.replace("_", " ")}`);
+    load();
+  };
+
   return (
     <div>
       <div>
