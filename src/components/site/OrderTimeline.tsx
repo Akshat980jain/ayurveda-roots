@@ -2,6 +2,15 @@ import { Check, Clock, Package, Truck, Home, XCircle, RotateCcw } from "lucide-r
 import { cn } from "@/lib/utils";
 
 export type OrderStatus = "pending" | "confirmed" | "shipped" | "delivered" | "cancelled";
+export type RefundStatus = "not_applicable" | "pending" | "processing" | "completed" | "failed";
+
+const REFUND_META: Record<RefundStatus, { label: string; tone: string; desc: string }> = {
+  not_applicable: { label: "No refund needed", tone: "bg-muted text-muted-foreground", desc: "Cash on Delivery — no payment was collected." },
+  pending:        { label: "Refund pending",   tone: "bg-amber-500/15 text-amber-700 dark:text-amber-400", desc: "Refund request received and queued for processing." },
+  processing:     { label: "Refund processing", tone: "bg-blue-500/15 text-blue-700 dark:text-blue-400",  desc: "Refund is being processed by your bank or payment provider." },
+  completed:      { label: "Refund completed", tone: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400", desc: "Refund has been credited to your original payment method." },
+  failed:         { label: "Refund failed",    tone: "bg-destructive/15 text-destructive", desc: "Refund could not be processed. Our team will reach out shortly." },
+};
 
 const STEPS: { key: OrderStatus; label: string; hindi: string; Icon: any; offsetDays: number }[] = [
   { key: "pending",   label: "Order placed", hindi: "ऑर्डर मिला",     Icon: Clock, offsetDays: 0 },
