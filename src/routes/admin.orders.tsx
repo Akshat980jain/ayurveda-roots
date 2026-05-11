@@ -144,13 +144,37 @@ function AdminOrders() {
         </Select>
       </div>
 
+      {cancelledPageRows.length > 0 && (
+        <div className="mt-4 flex flex-wrap items-center gap-3 rounded-2xl border border-border/60 bg-card p-3">
+          <label className="flex items-center gap-2 text-sm">
+            <Checkbox checked={allCancelledSelected} onCheckedChange={(v) => toggleAllOnPage(!!v)} />
+            <span className="text-muted-foreground">Select all cancelled on this page</span>
+          </label>
+          <div className="ml-auto flex flex-wrap items-center gap-2">
+            <span className="text-sm text-muted-foreground">{selected.size} selected</span>
+            <Select value={bulkRefund} onValueChange={(v) => setBulkRefund(v as RefundStatus)}>
+              <SelectTrigger className="w-48"><SelectValue placeholder="Set refund status…" /></SelectTrigger>
+              <SelectContent>
+                {REFUND_STATUSES.map((r) => <SelectItem key={r} value={r} className="capitalize">{r.replace("_", " ")}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Button size="sm" onClick={applyBulkRefund} disabled={working || !bulkRefund || selected.size === 0}>Apply</Button>
+            <Button size="sm" variant="outline" onClick={clearSelection} disabled={selected.size === 0}>Clear</Button>
+          </div>
+        </div>
+      )}
+
       <div className="mt-4 space-y-3">
         {loading && <div className="grid place-items-center rounded-2xl border border-border/60 bg-card p-10"><Loader2 className="size-5 animate-spin text-muted-foreground" /></div>}
         {!loading && pageRows.length === 0 && <div className="rounded-2xl border border-border/60 bg-card p-10 text-center text-muted-foreground">No orders match your filters.</div>}
         {!loading && pageRows.map((o) => (
           <div key={o.id} className="rounded-2xl border border-border/60 bg-card p-5">
             <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
+              <div className="flex items-start gap-3">
+                {o.status === "cancelled" && (
+                  <Checkbox className="mt-1" checked={selected.has(o.id)} onCheckedChange={(v) => toggleOne(o.id, !!v)} />
+                )}
+                <div>
                 <div className="font-mono text-sm">#{o.id.slice(0, 8)}</div>
                 <div className="text-xs text-muted-foreground">{new Date(o.created_at).toLocaleString()} · {o.payment_method.toUpperCase()}</div>
                 <div className="mt-1 text-sm">{(o.shipping_address as any).full_name} · {(o.shipping_address as any).city}, {(o.shipping_address as any).state} — {(o.shipping_address as any).pincode}</div>
