@@ -81,9 +81,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "description", content: "Handcrafted Ayurvedic skincare, hair care, digestion & immunity products. AYUSH certified, sourced from Indian soil." },
       { name: "author", content: "Vaidya & Co." },
       { property: "og:title", content: "Vaidya & Co. — Authentic Indian Ayurveda" },
-      { property: "og:description", content: "Handcrafted Ayurvedic remedies. 5000-year-old wisdom, modern delivery." },
+      { property: "og:description", content: "Handcrafted Ayurvedic skincare, hair care, digestion & immunity products. AYUSH certified, sourced from Indian soil." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Vaidya & Co. — Authentic Indian Ayurveda" },
+      { name: "twitter:description", content: "Handcrafted Ayurvedic skincare, hair care, digestion & immunity products. AYUSH certified, sourced from Indian soil." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/1773218f-b859-432e-b8b1-94668f4d3453/id-preview-75ba2b7b--8618c553-863c-4ef6-8f01-534894d90ffa.lovable.app-1778565872054.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/1773218f-b859-432e-b8b1-94668f4d3453/id-preview-75ba2b7b--8618c553-863c-4ef6-8f01-534894d90ffa.lovable.app-1778565872054.png" },
     ],
     links: [
       {
