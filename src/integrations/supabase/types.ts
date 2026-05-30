@@ -155,6 +155,7 @@ export type Database = {
         Row: {
           cancellation_reason: string | null
           cancelled_at: string | null
+          cod_amount_received: number
           coupon_code: string | null
           created_at: string
           discount: number
@@ -176,6 +177,7 @@ export type Database = {
         Insert: {
           cancellation_reason?: string | null
           cancelled_at?: string | null
+          cod_amount_received?: number
           coupon_code?: string | null
           created_at?: string
           discount?: number
@@ -197,6 +199,7 @@ export type Database = {
         Update: {
           cancellation_reason?: string | null
           cancelled_at?: string | null
+          cod_amount_received?: number
           coupon_code?: string | null
           created_at?: string
           discount?: number
