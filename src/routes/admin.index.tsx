@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { inr } from "@/lib/format";
-import { Package, ShoppingBag, IndianRupee, Clock } from "lucide-react";
+import { Package, ShoppingBag, IndianRupee, Clock, Wallet } from "lucide-react";
 
 export const Route = createFileRoute("/admin/")({ component: Dashboard });
 
