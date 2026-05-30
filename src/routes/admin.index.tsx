@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { inr } from "@/lib/format";
-import { Package, ShoppingBag, IndianRupee, Clock } from "lucide-react";
+import { Package, ShoppingBag, IndianRupee, Clock, Wallet } from "lucide-react";
 
 export const Route = createFileRoute("/admin/")({ component: Dashboard });
 
@@ -15,24 +15,31 @@ function Dashboard() {
     supabase.from("orders").select("*").order("created_at", { ascending: false }).limit(50).then(({ data }) => setOrders(data ?? []));
   }, []);
 
-  const stats = useMemo(() => ({
-    revenue: orders.reduce((s, o) => s + Number(o.total), 0),
-    orderCount: orders.length,
-    productCount: products.length,
-    pending: orders.filter((o) => o.status === "pending").length,
-    lowStock: products.filter((p) => p.stock < 10).length,
-  }), [orders, products]);
+  const stats = useMemo(() => {
+    const codOutstanding = orders
+      .filter((o) => String(o.payment_method).toLowerCase() === "cod" && o.status !== "cancelled")
+      .reduce((s, o) => s + Math.max(0, Number(o.total) - Number(o.cod_amount_received ?? 0)), 0);
+    return {
+      revenue: orders.reduce((s, o) => s + Number(o.total), 0),
+      orderCount: orders.length,
+      productCount: products.length,
+      pending: orders.filter((o) => o.status === "pending").length,
+      lowStock: products.filter((p) => p.stock < 10).length,
+      codOutstanding,
+    };
+  }, [orders, products]);
 
   return (
     <div>
       <h1 className="font-display text-3xl font-semibold">Dashboard</h1>
       <p className="text-sm text-muted-foreground">Overview of your store</p>
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <Stat icon={IndianRupee} label="Revenue" value={inr(stats.revenue)} />
         <Stat icon={ShoppingBag} label="Orders" value={String(stats.orderCount)} />
         <Stat icon={Package} label="Products" value={String(stats.productCount)} hint={`${stats.lowStock} low stock`} />
         <Stat icon={Clock} label="Pending orders" value={String(stats.pending)} />
+        <Stat icon={Wallet} label="COD outstanding" value={inr(stats.codOutstanding)} hint="Yet to collect" />
       </div>
 
       <div className="mt-8 rounded-2xl border border-border/60 bg-card p-5">

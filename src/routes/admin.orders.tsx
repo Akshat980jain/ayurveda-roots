@@ -92,6 +92,16 @@ function AdminOrders() {
     load();
   };
 
+  const updateCodReceived = async (order: any, value: string) => {
+    const amt = Math.max(0, Number(value) || 0);
+    setWorking(true);
+    const { error } = await supabase.from("orders").update({ cod_amount_received: amt }).eq("id", order.id);
+    setWorking(false);
+    if (error) return toast.error(error.message);
+    toast.success("COD received amount updated");
+    setOrders((prev) => prev.map((o) => o.id === order.id ? { ...o, cod_amount_received: amt } : o));
+  };
+
   const cancelledPageRows = pageRows.filter((o) => o.status === "cancelled");
   const allCancelledSelected = cancelledPageRows.length > 0 && cancelledPageRows.every((o) => selected.has(o.id));
   const toggleOne = (id: string, on: boolean) => {
@@ -209,6 +219,29 @@ function AdminOrders() {
                     </SelectContent>
                   </Select>
                   {o.refund_updated_at && <span className="text-xs text-muted-foreground">Updated {new Date(o.refund_updated_at).toLocaleString()}</span>}
+                </div>
+              )}
+              {String(o.payment_method).toLowerCase() === "cod" && o.status !== "cancelled" && (
+                <div className="mt-4 flex flex-wrap items-center gap-3 rounded-lg border border-border/60 bg-muted/30 p-3">
+                  <Label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">COD received</Label>
+                  <Input
+                    type="number"
+                    defaultValue={Number(o.cod_amount_received ?? 0)}
+                    min={0}
+                    max={Number(o.total)}
+                    onBlur={(e) => {
+                      const v = Number(e.target.value) || 0;
+                      if (v !== Number(o.cod_amount_received ?? 0)) updateCodReceived(o, e.target.value);
+                    }}
+                    className="w-32"
+                    disabled={working}
+                  />
+                  <span className="text-xs text-muted-foreground">
+                    of {inr(Number(o.total))} · Remaining{" "}
+                    <span className="font-semibold text-clay">
+                      {inr(Math.max(0, Number(o.total) - Number(o.cod_amount_received ?? 0)))}
+                    </span>
+                  </span>
                 </div>
               )}
             </div>
