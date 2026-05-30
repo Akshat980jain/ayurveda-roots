@@ -92,6 +92,16 @@ function AdminOrders() {
     load();
   };
 
+  const updateCodReceived = async (order: any, value: string) => {
+    const amt = Math.max(0, Number(value) || 0);
+    setWorking(true);
+    const { error } = await supabase.from("orders").update({ cod_amount_received: amt }).eq("id", order.id);
+    setWorking(false);
+    if (error) return toast.error(error.message);
+    toast.success("COD received amount updated");
+    setOrders((prev) => prev.map((o) => o.id === order.id ? { ...o, cod_amount_received: amt } : o));
+  };
+
   const cancelledPageRows = pageRows.filter((o) => o.status === "cancelled");
   const allCancelledSelected = cancelledPageRows.length > 0 && cancelledPageRows.every((o) => selected.has(o.id));
   const toggleOne = (id: string, on: boolean) => {
