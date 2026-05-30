@@ -1,6 +1,7 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useRef, useState } from "react";
 import { CheckCircle2 } from "lucide-react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { inr } from "@/lib/format";
@@ -11,11 +12,21 @@ export const Route = createFileRoute("/order/$id")({ component: OrderConfirm });
 
 function OrderConfirm() {
   const { id } = Route.useParams();
+  const navigate = useNavigate();
   const [o, setO] = useState<any>(null);
   useEffect(() => { supabase.from("orders").select("*").eq("id", id).maybeSingle().then(({ data }) => setO(data)); }, [id]);
   const live = useOrderStatus(id, o ? { status: o.status, cancellation_reason: o.cancellation_reason, cancelled_at: o.cancelled_at } : undefined);
-  if (!o) return <div className="mx-auto max-w-3xl px-4 py-20 md:px-8">Loading…</div>;
-  const status = (live.status ?? o.status) as OrderStatus;
+  const status = (live.status ?? o?.status) as OrderStatus | undefined;
+  const notified = useRef(false);
+  useEffect(() => {
+    if (status === "confirmed" && !notified.current) {
+      notified.current = true;
+      toast.success("Order confirmed by admin! Redirecting to home…");
+      const t = setTimeout(() => navigate({ to: "/" }), 2500);
+      return () => clearTimeout(t);
+    }
+  }, [status, navigate]);
+  if (!o || !status) return <div className="mx-auto max-w-3xl px-4 py-20 md:px-8">Loading…</div>;
   return (
     <div className="mx-auto max-w-3xl px-4 py-16 md:px-8">
       <div className="rounded-3xl border border-border/60 bg-card p-10 text-center shadow-soft">
