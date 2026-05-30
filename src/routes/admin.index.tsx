@@ -17,7 +17,7 @@ function Dashboard() {
 
   const stats = useMemo(() => {
     const codOutstanding = orders
-      .filter((o) => String(o.payment_method).toLowerCase() === "cod" && o.status !== "cancelled" && o.status !== "delivered" || (String(o.payment_method).toLowerCase() === "cod" && o.status !== "cancelled" && Number(o.cod_amount_received ?? 0) < Number(o.total)))
+      .filter((o) => String(o.payment_method).toLowerCase() === "cod" && o.status !== "cancelled")
       .reduce((s, o) => s + Math.max(0, Number(o.total) - Number(o.cod_amount_received ?? 0)), 0);
     return {
       revenue: orders.reduce((s, o) => s + Number(o.total), 0),
